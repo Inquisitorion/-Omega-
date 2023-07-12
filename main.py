@@ -1,38 +1,171 @@
-import telebot, requests, json
+import requests
+import telebot
+import time
+import random
+import math
 from telebot import types
-token = '6134943560:AAG79Dza7t287LRS9iuND4GxRt03Mc-N-GU'
-bot = telebot.TeleBot(token)
+from googletrans import Translator
+from bs4 import BeautifulSoup
+
+BOT_TOKEN = '6055944515:AAHcWV5qpCTH1ouoFvHslXLMx6jK7ZeAGqs'
+bot = telebot.TeleBot(BOT_TOKEN)
+
+TIMEOUT_CONNECTION = 5
+START_MESSAGE = "Привет, я omega."
+bd = [{'user_id': '0', 'state': 'default'}]
+
+
+def make_bd(message):
+    already_have = False
+    for user in bd:
+        if user['user_id'] == message.chat.id:
+            already_have = True
+
+    if not already_have:
+        bd.append({'user_id': message.chat.id, 'state': 'default'})
+    print(bd)
+
+
 @bot.message_handler(commands=['start'])
-def start(message):
-    bot.send_message(message.chat.id, 'Здравствуйте!')
+def send_start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    item1 = types.KeyboardButton("Калькулятор")
-    item2 = types.KeyboardButton("Погода")
-    item3 = types.KeyboardButton("Переводчик")
-    item4 = types.KeyboardButton("Мем дня")
-    item5 = types.KeyboardButton("Выход")
-    markup.add(item1)
-    markup.add(item2)
-    markup.add(item3)
-    markup.add(item4)
-    markup.add(item5)
-    bot.send_message(message.chat.id,'Выберите что вам надо:',reply_markup=markup)
-@bot.message_handler(content_types='text')
-def message_reply(message):
-    if message.text=="Калькулятор":
-        bot.send_message(message.chat.id, '1')
-
-    elif message.text=="Погода":
-        bot.send_message(message.chat.id, '2')
-
-    elif message.text=="Переводчик":
-        bot.send_message(message.chat.id, '3')
-
-    elif message.text=="Мем дня":
-        bot.send_message(message.chat.id, '4')
-
-    elif message.text=="Выход":
-        bot.send_message(message.chat.id, 'До свидания, спасибо за использование бота')
+    item1 = types.KeyboardButton('1-Переводчик')
+    item2 = types.KeyboardButton('2-Калькулятор')
+    item3 = types.KeyboardButton('3-Погода')
+    item4 = types.KeyboardButton('4-Мемы')
+    item5 = types.KeyboardButton('5-Информация')
+    markup.add(item1, item2, item3, item4, item5)
+    bot.send_message(message.chat.id, 'Сделай выбор, user!', reply_markup=markup)
+    make_bd(message)
 
 
-bot.polling(none_stop=True)
+@bot.message_handler(content_types=['text'])
+def bot_message(message):
+    item_back = types.KeyboardButton('0-Назад')
+    item1 = types.KeyboardButton('1-Переводчик')
+    item2 = types.KeyboardButton('2-Калькулятор')
+    item3 = types.KeyboardButton('3-Погода')
+    item4 = types.KeyboardButton('4-Мемы')
+    item5 = types.KeyboardButton('5-Информация')
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+    make_bd(message)
+
+    for i in bd:
+        if i['user_id'] == message.chat.id:
+            user = i
+
+    if message.chat.type == 'private':
+        if message.text == '1-Переводчик':
+            markup.add(item_back, item5)
+            bot.send_message(message.chat.id, 'Введите текст для перевода', reply_markup=markup)
+            user['state'] = 'translate'
+
+        elif message.text == '2-Калькулятор':
+            markup.add(item_back, item5)
+            bot.send_message(message.chat.id, 'Введите выражение для посчитать', reply_markup=markup)
+            user['state'] = 'calculate'
+
+        elif message.text == '3-Погода':
+            markup.add(item_back, item5)
+            bot.send_message(message.chat.id, 'Введите город, чтобы узнать погоду', reply_markup=markup)
+            user['state'] = 'weather'
+
+        elif message.text == '4-Мемы':
+            markup.add(item_back, item5)
+            bot.send_message(message.chat.id, 'Пришлю вам прикол ГЫ-ГЫ-ГЫ!', reply_markup=markup)
+            user['state'] = 'memes'
+            memes(message)
+
+
+        elif message.text == '5-Информация':
+            if user['state'] == 'default':
+                bot.send_message(message.chat.id, 'СПБГУТ ИКПИ-12 Соколов Егор, Проскуряк Влад')
+            elif user['state'] == 'calculate':
+                bot.send_message(message.chat.id, 'Вам доступны базовые арифметические операци')
+            elif user['state'] == 'translate':
+                bot.send_message(message.chat.id, 'В боте доступно два языка: RU, EN')
+            elif user['state'] == 'weather':
+                bot.send_message(message.chat.id, 'Бот знает погоду во всех городах мира')
+            elif user['state'] == 'memes':
+                bot.send_message(message.chat.id, 'Бот умеет скидывать рандомный мем')
+
+        elif message.text == '0-Назад':
+            markup.add(item1, item2, item3, item4, item5)
+            bot.send_message(message.chat.id, '0-Назад', reply_markup=markup)
+            user['state'] = 'default'
+
+        else:
+            if user['state'] == 'calculate':
+                calculator(message)
+            elif user['state'] == 'translate':
+
+                translator(message)
+            elif user['state'] == 'weather':
+                weather(message)
+            elif user['state'] == 'memes':
+                memes(message)
+
+
+def translator(message):
+
+    translator = Translator()
+    src = 'en'
+    dest = 'ru'
+    translated_text = translator.translate(message.text, src=src, dest=dest)
+    bot.send_message(message.chat.id, translated_text.text)
+
+
+def memes(message):
+    accept = False
+    errors = 0
+    while not accept:
+        random_number = random.randint(0, 2000)
+        public1 = 457333087 - random_number
+        url = f'https://vk.com/tnull?z=photo-72495085_457333086%2Falbum-72495085_00%2Frev'
+        response = requests.get(url)
+        bs = BeautifulSoup(response.text, "lxml")
+        img = bs.find('a', 'PhotoviewPage__photo').find('img').attrs['src']
+        bot.send_photo(message.chat.id, img)
+        accept = True
+
+
+# погода
+def weather(message):
+    weather_api_key = '54e6869ab9c8a14b92e5ada3bbd43ee6'
+    try:
+        response = requests.get(
+            f"http://api.openweathermap.org/data/2.5/weather?q={message.text}&lang=ru&units=metric&appid={weather_api_key}")
+        data = response.json()
+
+        city = data["name"]
+        cur_temp = data["main"]["temp"]
+        humidity = data["main"]["humidity"]
+        pressure = data["main"]["pressure"]
+        wind = data["wind"]["speed"]
+        bot.send_message(message.chat.id,
+                         f"Погода в городе: {city}\nТемпература: {cur_temp}°C\nВлажность: {humidity}%\nДавление: {math.ceil(pressure / 1.333)} мм.рт.ст\nВетер: {wind} м/с \nХорошего дня!")
+    except:
+        bot.send_message(message.chat.id, 'Проверьте название города!')
+
+
+def calculator(message):
+    msg = None
+    user_message = message.text.lower()
+    user_message = user_message.lstrip()
+    user_message = user_message.rstrip()
+    answer = str(eval(user_message.replace(' ', '')))
+    msg = bot.send_message(message.chat.id, user_message.replace(' ', '') + ' = ' + answer)
+
+
+# Вход в программу
+if __name__ == '__main__':
+
+    bot.polling()
+    while True:
+        try:
+            bot.polling(none_stop=True)
+        except Exception as e:
+            print('Ошибка подключения. Я устал!' % TIMEOUT_CONNECTION)
+            time.sleep(TIMEOUT_CONNECTION)
+
