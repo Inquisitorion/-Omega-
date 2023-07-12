@@ -31,11 +31,11 @@ def make_bd(message):
 @bot.message_handler(commands=['start'])
 def send_start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    item1 = types.KeyboardButton('1-Переводчик')
-    item2 = types.KeyboardButton('2-Калькулятор')
-    item3 = types.KeyboardButton('3-Погода')
-    item4 = types.KeyboardButton('4-Мемы')
-    item5 = types.KeyboardButton('5-Информация')
+    item1 = types.KeyboardButton('🈳Переводчик')
+    item2 = types.KeyboardButton('➗Калькулятор')
+    item3 = types.KeyboardButton('🔆Погода')
+    item4 = types.KeyboardButton('😈Мемы')
+    item5 = types.KeyboardButton('👁‍🗨Информация')
     markup.add(item1, item2, item3, item4, item5)
     bot.send_message(message.chat.id, 'Сделай выбор, user!', reply_markup=markup)
     make_bd(message)
@@ -43,12 +43,12 @@ def send_start(message):
 
 @bot.message_handler(content_types=['text'])
 def bot_message(message):
-    item_back = types.KeyboardButton('0-Назад')
-    item1 = types.KeyboardButton('1-Переводчик')
-    item2 = types.KeyboardButton('2-Калькулятор')
-    item3 = types.KeyboardButton('3-Погода')
-    item4 = types.KeyboardButton('4-Мемы')
-    item5 = types.KeyboardButton('5-Информация')
+    item_back = types.KeyboardButton('Назад')
+    item1 = types.KeyboardButton('🈳Переводчик')
+    item2 = types.KeyboardButton('➗Калькулятор')
+    item3 = types.KeyboardButton('🔆Погода')
+    item4 = types.KeyboardButton('😈Мемы')
+    item5 = types.KeyboardButton('👁‍🗨Информация')
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
     make_bd(message)
@@ -58,29 +58,29 @@ def bot_message(message):
             user = i
 
     if message.chat.type == 'private':
-        if message.text == '1-Переводчик':
+        if message.text == '🈳Переводчик':
             markup.add(item_back, item5)
             bot.send_message(message.chat.id, 'Введите текст для перевода', reply_markup=markup)
             user['state'] = 'translate'
 
-        elif message.text == '2-Калькулятор':
+        elif message.text == '➗Калькулятор':
             markup.add(item_back, item5)
             bot.send_message(message.chat.id, 'Введите выражение для посчитать', reply_markup=markup)
             user['state'] = 'calculate'
 
-        elif message.text == '3-Погода':
+        elif message.text == '🔆Погода':
             markup.add(item_back, item5)
             bot.send_message(message.chat.id, 'Введите город, чтобы узнать погоду', reply_markup=markup)
             user['state'] = 'weather'
 
-        elif message.text == '4-Мемы':
+        elif message.text == '😈Мемы':
             markup.add(item_back, item5)
             bot.send_message(message.chat.id, 'Пришлю вам прикол ГЫ-ГЫ-ГЫ!', reply_markup=markup)
             user['state'] = 'memes'
             memes(message)
 
 
-        elif message.text == '5-Информация':
+        elif message.text == '👁‍🗨Информация':
             if user['state'] == 'default':
                 bot.send_message(message.chat.id, 'СПБГУТ ИКПИ-12 Соколов Егор, Проскуряк Влад')
             elif user['state'] == 'calculate':
@@ -92,7 +92,7 @@ def bot_message(message):
             elif user['state'] == 'memes':
                 bot.send_message(message.chat.id, 'Бот умеет скидывать рандомный мем')
 
-        elif message.text == '0-Назад':
+        elif message.text == 'Назад':
             markup.add(item1, item2, item3, item4, item5)
             bot.send_message(message.chat.id, '0-Назад', reply_markup=markup)
             user['state'] = 'default'
