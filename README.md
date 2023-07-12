@@ -1,3 +1,10 @@
+
+![omega](https://github.com/Inquisitorion/TelgBot/assets/139252221/e73bf3d8-a28b-4466-8be6-00423f97aba2)
+
+
+
+
+
 # Omega_bot
 Ссылка на бота - https://t.me/saintpomegabot
 
