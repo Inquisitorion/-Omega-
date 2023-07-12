@@ -14,6 +14,8 @@ TIMEOUT_CONNECTION = 5
 START_MESSAGE = "Привет, я omega."
 bd = [{'user_id': '0', 'state': 'default'}]
 
+urltl = 'https://api.telegram.org/bot'
+
 
 def make_bd(message):
     already_have = False
@@ -108,26 +110,19 @@ def bot_message(message):
 
 
 def translator(message):
-
-    translator = Translator()
-    src = 'en'
-    dest = 'ru'
-    translated_text = translator.translate(message.text, src=src, dest=dest)
-    bot.send_message(message.chat.id, translated_text.text)
-
+    if message.text:
+        translator = Translator(service_urls=['translate.google.com'])
+        translation = translator.translate(message.text,
+                                           dest='ru' if translator.detect(message.text).lang == 'en' else 'en')
+        translated_text = translation.text
+        bot.send_message(message.chat.id, f'Переведенный текст:\n\n{translated_text}')
+    else:
+        bot.send_message(message.chat.id, 'Пожалуйста, введите текст для перевода.')
 
 def memes(message):
-    accept = False
-    errors = 0
-    while not accept:
-        random_number = random.randint(0, 2000)
-        public1 = 457333087 - random_number
-        url = f'https://vk.com/tnull?z=photo-72495085_457333086%2Falbum-72495085_00%2Frev'
-        response = requests.get(url)
-        bs = BeautifulSoup(response.text, "lxml")
-        img = bs.find('a', 'PhotoviewPage__photo').find('img').attrs['src']
-        bot.send_photo(message.chat.id, img)
-        accept = True
+        img_url = f'https://t.me/memes_prog/%7Brandom.randint(1, 1000)'
+        request_url = f'{urltl}{BOT_TOKEN}/sendPhoto?chat_id={message.chat.id}&photo={img_url}'
+        requests.get(request_url)
 
 
 # погода
