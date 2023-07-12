@@ -1,5 +1,6 @@
 
-![omega](https://github.com/Inquisitorion/TelgBot/assets/139252221/e73bf3d8-a28b-4466-8be6-00423f97aba2)
+![omega](https://github.com/Inquisitorion/-Omega-/assets/139252221/244ab3e0-83b6-4a64-833c-d186c0189273)
+
 
 
 
